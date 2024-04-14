@@ -255,11 +255,8 @@ void kmeans(uint8_t k, cluster* centroides, uint32_t num_pixels, rgb* pixels){
 		condition = 0;
 		for(j = 0; j < k; j++) 
 		{
-			if(centroides[j].num_puntos == 0) 
+			if(points[j] == 0) 
 			{
-				continue;
-			}
-
 			centroides[j].media_r = red[j] / points[j];
                         centroides[j].media_g = green[j] / points[j];
                         centroides[j].media_b = blue[j] / points[j];
@@ -268,6 +265,7 @@ void kmeans(uint8_t k, cluster* centroides, uint32_t num_pixels, rgb* pixels){
 			centroides[j].r = centroides[j].media_r;
 			centroides[j].g = centroides[j].media_g;
 			centroides[j].b = centroides[j].media_b;
+			}
 		}
 		
 		i++;
