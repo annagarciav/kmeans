@@ -177,7 +177,7 @@ uint8_t find_closest_centroid(rgb* p, cluster* centroids, uint8_t num_clusters){
 		diffG = centroids[j].g - p->g;
 		diffB = centroids[j].b - p->b; 
 		// No sqrt required.
-		dis[j] = diffR*diffR + diffG*diffG + diffB*diffB;
+		aux = diffR*diffR + diffG*diffG + diffB*diffB;
 		
 		//if(dis[j] < min) 
 		if(aux < min)
