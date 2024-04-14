@@ -223,8 +223,9 @@ void kmeans(uint8_t k, cluster* centroides, uint32_t num_pixels, rgb* pixels){
 	do 
   	{
 		// Reset centroids
+		#pragma omp parallel for
 		for(j = 0; j < k; j++) 
-    	{
+    		{
 			centroides[j].media_r = 0;
 			centroides[j].media_g = 0;
 			centroides[j].media_b = 0;
@@ -253,9 +254,10 @@ void kmeans(uint8_t k, cluster* centroides, uint32_t num_pixels, rgb* pixels){
 
 		// Update centroids & check stop condition
 		condition = 0;
+		#pragma omp parallel for reduction(||: condition)
 		for(j = 0; j < k; j++) 
 		{
-			if(points[j] == 0) 
+			if(points[j] > 0) 
 			{
 			centroides[j].media_r = red[j] / points[j];
                         centroides[j].media_g = green[j] / points[j];
