@@ -166,9 +166,10 @@ uint32_t getChecksum(cluster* centroids, uint8_t k){
  */
 uint8_t find_closest_centroid(rgb* p, cluster* centroids, uint8_t num_clusters){
 	uint32_t min = UINT32_MAX;
-	uint32_t dis[num_clusters];
+	//uint32_t dis[num_clusters];
 	uint8_t closest = 0, j;
 	int16_t diffR, diffG, diffB;
+	uint32_t aux; // !!!!!!!!!!!!!!!!!!
 
 	for(j = 0; j < num_clusters; j++) 
 	{
@@ -178,9 +179,10 @@ uint8_t find_closest_centroid(rgb* p, cluster* centroids, uint8_t num_clusters){
 		// No sqrt required.
 		dis[j] = diffR*diffR + diffG*diffG + diffB*diffB;
 		
-		if(dis[j] < min) 
+		//if(dis[j] < min) 
+		if(aux < min)
 		{
-			min = dis[j];
+			min = aux;
 			closest = j;
 		}
 	}
