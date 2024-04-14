@@ -201,10 +201,10 @@ void kmeans(uint8_t k, cluster* centroides, uint32_t num_pixels, rgb* pixels){
 	uint32_t i, j, random_num;
 	
 	// !! aplicar aquest format (vectors) per poder fer reduction
-        uint32_t* red = malloc(k* sizeof(uint32_t));
-        uint32_t* green = malloc(k* sizeof(uint32_t));
-        uint32_t* blue = malloc(k* sizeof(uint32_t));
-        uint32_t* points = malloc(k* sizeof(uint32_t));
+	uint32_t* red = malloc(k* sizeof(uint32_t));
+	uint32_t* green = malloc(k* sizeof(uint32_t));
+	uint32_t* blue = malloc(k* sizeof(uint32_t));
+	uint32_t* points = malloc(k* sizeof(uint32_t));
 	
 	printf("STEP 1: K = %d\n", k);
 	k = MIN(k, num_pixels);
@@ -234,24 +234,24 @@ void kmeans(uint8_t k, cluster* centroides, uint32_t num_pixels, rgb* pixels){
 			centroides[j].num_puntos = 0;
 		
 			red[j] = 0;
-                        green[j] = 0;
-                        blue[j] = 0;
-                        points[j] = 0;
+			green[j] = 0;
+			blue[j] = 0;
+			points[j] = 0;
 		}
    
 		// Find closest cluster for each pixel
 		#pragma omp parallel for reduction(+: red[:k], green[:k], blue[:k], points[:k])
 		for(j = 0; j < num_pixels; j++) 
-    		{
-		closest = find_closest_centroid(&pixels[j], centroides, k); // !! es el cuello botella! paralelizar la funcion
-	        //centroides[closest].media_r += pixels[j].r;
-		//centroides[closest].media_g += pixels[j].g;
-		//centroides[closest].media_b += pixels[j].b;
-		// centroides[closest].num_puntos++;
-		red[closest] += pixels[j].r;
-		green[closest] += pixels[j].g;
-		blue[closest] += pixels[j].b;
-		points[closest] += 1;
+    	{
+			closest = find_closest_centroid(&pixels[j], centroides, k); // !! es el cuello botella! paralelizar la funcion
+			//centroides[closest].media_r += pixels[j].r;
+			//centroides[closest].media_g += pixels[j].g;
+			//centroides[closest].media_b += pixels[j].b;
+			// centroides[closest].num_puntos++;
+			red[closest] += pixels[j].r;
+			green[closest] += pixels[j].g;
+			blue[closest] += pixels[j].b;
+			points[closest] += 1;
 		}
 
 		// Update centroids & check stop condition
@@ -262,8 +262,8 @@ void kmeans(uint8_t k, cluster* centroides, uint32_t num_pixels, rgb* pixels){
 			if(points[j] > 0) 
 			{
 			centroides[j].media_r = red[j] / points[j];
-                        centroides[j].media_g = green[j] / points[j];
-                        centroides[j].media_b = blue[j] / points[j];
+			centroides[j].media_g = green[j] / points[j];
+			centroides[j].media_b = blue[j] / points[j];
 			changed = centroides[j].media_r != centroides[j].r || centroides[j].media_g != centroides[j].g || centroides[j].media_b != centroides[j].b;
 			condition = condition || changed;
 			centroides[j].r = centroides[j].media_r;
