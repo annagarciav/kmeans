@@ -225,7 +225,7 @@ void kmeans(uint8_t k, cluster* centroides, uint32_t num_pixels, rgb* pixels){
   	{
 		// Reset centroids
 	//! transferencia de dades (copies) entre la memoria del HOST (CPU) i la del dispositiu (GPU)
-	#pragma acc data copy(centroides[0:k], pixels[0:num_pixels]) \ copyout(red[0:k], green[0:k], blue[0:k], points[0:k])
+	#pragma acc data copy(centroides[0:k], pixels[0:num_pixels],red[0:k], green[0:k], blue[0:k], points[0:k])
 	{
 		#pragma acc parallel loop present(centroides[0:k])
 		for(j = 0; j < k; j++) 
