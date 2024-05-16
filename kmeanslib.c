@@ -205,6 +205,8 @@ void kmeans(uint8_t k, cluster* centroides, uint32_t num_pixels, rgb* pixels){
 	uint32_t* blue = malloc(k* sizeof(uint32_t));
 	uint32_t* points = malloc(k* sizeof(uint32_t));
 	
+	uint32_t* pixels_aux = malloc(num_pixels * sizeof(uint32_t));
+	
 	printf("STEP 1: K = %d\n", k);
 	k = MIN(k, num_pixels);
 	
