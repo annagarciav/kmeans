@@ -225,7 +225,7 @@ void kmeans(uint8_t k, cluster* centroides, uint32_t num_pixels, rgb* pixels){
   	{
 		// Reset centroids
 	//! transferencia de dades (copies) entre la memoria del HOST (CPU) i la del dispositiu (GPU)
-	#pragma acc data copy(centroides[0:k], pixels[0:num_pixels],red[0:k], green[0:k], blue[0:k], points[0:k])
+	#pragma acc data copy(centroides[0:k], pixels[0:num_pixels], red[0:k], green[0:k], blue[0:k], points[0:k])
 	{
 		#pragma acc parallel loop present(centroides[0:k])
 		for(j = 0; j < k; j++) 
@@ -240,38 +240,68 @@ void kmeans(uint8_t k, cluster* centroides, uint32_t num_pixels, rgb* pixels){
 			blue[j] = 0;
 			points[j] = 0;
 		}
-   
-		// Find closest cluster for each pixel
-		#pragma acc parallel loop present(centroides[0:k], pixels[0:num_pixels], red[0:k], green[0:k], blue[0:k], points[0:k])
-		for(j = 0; j < num_pixels; j++) 
-    	{
-			closest = find_closest_centroid(&pixels[j], centroides, k); // !! es el cuello botella! paralelizar la funcion
-			//centroides[closest].media_r += pixels[j].r;
-			//centroides[closest].media_g += pixels[j].g;
-			//centroides[closest].media_b += pixels[j].b;
-			// centroides[closest].num_puntos++;
-			red[closest] += pixels[j].r;
-			green[closest] += pixels[j].g;
-			blue[closest] += pixels[j].b;
-			points[closest] += 1;
-		}
 
-		// Update centroids & check stop condition
-		condition = 0;
-		#pragma acc parallel loop reduction(||: condition)
-		for(j = 0; j < k; j++) 
+		#pragma acc parallel loop
+		// Find closest centroid
+                for(j = 0; j < num_pixels; j++) 
+                {
+                        uint32_t min = UINT32_MAX;
+                        uint32_t dis;
+                        uint8_t closest = 0;
+                        int16_t diffR, diffG, diffB;
+			
+                        for(int l = 0; l < k; l++)
+                        {
+                                diffR = centroides[l].r - pixels[j].r;
+                                diffG = centroides[l].g - pixels[j].g;
+                                diffB = centroides[l].b - pixels[j].b;
+                                dis = diffR*diffR + diffG*diffG + diffB*diffB;
+                                
+                               	if(dis < min)
+                                {
+                                        pixels_aux[j] = l;
+                                        min = dis;
+                                }
+                        }
+                        
+                }
+        }
+
+	// Find closest cluster for each pixel
+	for(j = 0; j < num_pixels; j++) 
+	{
+	    uint32_t nro_cluster = pixels_aux[j];
+	    red[nro_cluster] += pixels[j].r;
+	    green[nro_cluster] += pixels[j].g;
+	    blue[nro_cluster] += pixels[j].b;
+	    points[nro_cluster] ++;
+
+	}
+
+	// Afegir les dades calculades als centroides
+	for(j = 0; j < k; j++)
+        {
+		centroides[j].media_r = red[j];
+		centroides[j].media_g = green[j];
+		centroides[j].media_b = blue[j];
+		centroides[j].num_puntos = points[j];
+		
+	}
+
+	// Update centroids & check stop condition
+	condition = 0;
+	for(j = 0; j < k; j++) 
+	{
+		if(points[j] > 0) 
 		{
-			if(points[j] > 0) 
-			{
-			centroides[j].media_r = red[j] / points[j];
-			centroides[j].media_g = green[j] / points[j];
-			centroides[j].media_b = blue[j] / points[j];
-			changed = centroides[j].media_r != centroides[j].r || centroides[j].media_g != centroides[j].g || centroides[j].media_b != centroides[j].b;
-			condition = condition || changed;
-			centroides[j].r = centroides[j].media_r;
-			centroides[j].g = centroides[j].media_g;
-			centroides[j].b = centroides[j].media_b;
-			}
+		centroides[j].media_r = red[j] / points[j];
+		centroides[j].media_g = green[j] / points[j];
+		centroides[j].media_b = blue[j] / points[j];
+		changed = centroides[j].media_r != centroides[j].r || centroides[j].media_g != centroides[j].g || centroides[j].media_b != centroides[j].b;
+		condition = condition || changed;
+		centroides[j].r = centroides[j].media_r;
+		centroides[j].g = centroides[j].media_g;
+		centroides[j].b = centroides[j].media_b;
 		}
 	}
 	i++;
